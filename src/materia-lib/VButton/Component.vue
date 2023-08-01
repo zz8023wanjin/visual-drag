@@ -1,7 +1,7 @@
 <script setup>
 const props = defineProps({
   propValue: {
-    default: '',
+    default: '按钮',
   },
   element: {
     type: Object,
@@ -28,7 +28,7 @@ const props = defineProps({
   box-sizing: border-box;
   outline: 0;
   margin: 0;
-  transition: 0.1s;
+  // transition: 0.1s;
   font-weight: 500;
   width: 100%;
   height: 100%;

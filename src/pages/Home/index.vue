@@ -1,18 +1,60 @@
 <script setup>
 import ComponentList from '@/components/ComponentList.vue'
 import Editor from '@/components/Editor/index.vue'
+import { cloneDeep } from 'lodash-es'
+import componentList from '@/materia-lib/component-list'
+import { useComposeStore } from '@/store/compose'
+import { useCommonStore } from '@/store/common'
+import { onMounted } from 'vue'
+import generateID from '@/utils/generateID'
+import { useContextMenu } from '@/store/contextMenu'
+
+// store
+const composeStore = useComposeStore()
+const commonStore = useCommonStore()
+const contextMenuStore = useContextMenu()
 
 const handleDrop = (e) => {
   e.preventDefault()
   e.stopPropagation()
 
   const index = e.dataTransfer.getData('index')
-  console.log(index)
+  const rectInfo = composeStore.editor.getBoundingClientRect()
+  if (index) {
+    const component = cloneDeep(componentList[index])
+    component.style.top = e.clientY - rectInfo.y
+    component.style.left = e.clientX - rectInfo.x
+    component.id = generateID()
+
+    commonStore.addComponent(component)
+  }
 }
+
+onMounted(() => {
+  composeStore.getEditor()
+})
 
 const handleDragOver = (e) => {
   e.preventDefault()
   e.dataTransfer.dropEffect = 'copy'
+}
+
+const deselectCurComponent = (e) => {
+  if (!commonStore.isClickComponent) {
+    commonStore.setCurComponent(null, null)
+  }
+
+  // 0-左击 1-滚轮 2-右击
+  if (e.button !== 2) {
+    contextMenuStore.hideContextMenu()
+  }
+}
+
+const handleMouseDown = (e) => {
+  e.stopPropagation()
+
+  commonStore.setInEditorStatus(true)
+  commonStore.setClickComponentStatus(false)
 }
 </script>
 
@@ -26,7 +68,13 @@ const handleDragOver = (e) => {
 
       <!-- 中间画布 -->
       <section class="center">
-        <div class="content" @drop="handleDrop" @dragover="handleDragOver">
+        <div
+          class="content"
+          @drop="handleDrop"
+          @dragover="handleDragOver"
+          @mouseup="deselectCurComponent"
+          @mousedown="handleMouseDown"
+        >
           <Editor />
         </div>
       </section>
