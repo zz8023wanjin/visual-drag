@@ -8,11 +8,14 @@ import { useCommonStore } from '@/store/common'
 import { onMounted } from 'vue'
 import generateID from '@/utils/generateID'
 import { useContextMenu } from '@/store/contextMenu'
+import Toolbar from '@/components/Toolbar.vue'
+import { useSnapshotStore } from '@/store/snapshot'
 
 // store
 const composeStore = useComposeStore()
 const commonStore = useCommonStore()
 const contextMenuStore = useContextMenu()
+const snapshotStore = useSnapshotStore()
 
 const handleDrop = (e) => {
   e.preventDefault()
@@ -27,6 +30,7 @@ const handleDrop = (e) => {
     component.id = generateID()
 
     commonStore.addComponent(component)
+    snapshotStore.recordSnapshot()
   }
 }
 
@@ -60,6 +64,8 @@ const handleMouseDown = (e) => {
 
 <template>
   <div class="home">
+    <Toolbar />
+
     <main>
       <!-- 左侧物料库 -->
       <section class="left">

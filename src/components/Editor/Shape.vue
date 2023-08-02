@@ -1,5 +1,6 @@
 <script setup>
 import { useCommonStore } from '@/store/common'
+import { useSnapshotStore } from '@/store/snapshot';
 import { to } from 'mathjs'
 
 const props = defineProps({
@@ -28,6 +29,7 @@ const props = defineProps({
 const pointList = ['lt', 't', 'rt', 'r', 'rb', 'b', 'lb', 'l']
 
 const commonStore = useCommonStore()
+const snapshotStore = useSnapshotStore()
 
 const onMouseDown = (e) => {
   e.stopPropagation()
@@ -41,7 +43,9 @@ const onMouseDown = (e) => {
   const startTop = Number(pos.top)
   const startLeft = Number(pos.left)
 
+  let needSave = false
   const move = (moveEvent) => {
+    needSave = true
     const curX = moveEvent.clientX
     const curY = moveEvent.clientY
 
@@ -51,6 +55,7 @@ const onMouseDown = (e) => {
   }
 
   const up = () => {
+    needSave && snapshotStore.recordSnapshot()
     document.removeEventListener('mousemove', move)
     document.removeEventListener('mouseup', up)
   }
@@ -121,6 +126,7 @@ const onMouseDownByPoint = (point, e) => {
 
   let needSave = false
   const move = (event) => {
+    needSave = true
     const curX = event.clientX
     const curY = event.clientY
     const hasT = /t/.test(point)
@@ -143,6 +149,7 @@ const onMouseDownByPoint = (point, e) => {
   }
 
   const down = (event) => {
+    needSave && snapshotStore.recordSnapshot()
     document.removeEventListener('mousemove', move)
     document.removeEventListener('mouseup', down)
   }

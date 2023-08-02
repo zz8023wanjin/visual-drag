@@ -2,11 +2,13 @@
 import { useCommonStore } from '@/store/common'
 import { useContextMenu } from '@/store/contextMenu'
 import { useCopyStore } from '@/store/copy'
+import { useSnapshotStore } from '@/store/snapshot';
 
 // store
 const store = useContextMenu()
 const commonStore = useCommonStore()
 const copyStore = useCopyStore()
+const snapshotStore = useSnapshotStore()
 
 const handleMouseUp = () => {
   commonStore.setClickComponentStatus(true)
@@ -18,6 +20,7 @@ const copy = () => {
 
 const paste = () => {
   copyStore.paste(true)
+  snapshotStore.recordSnapshot()
 }
 
 const cut = () => {
@@ -26,24 +29,29 @@ const cut = () => {
 
 const deleteComponent = () => {
   commonStore.deleteComponent()
+  snapshotStore.recordSnapshot()
 }
 
 const lock = () => {}
 
 const topComponent = () => {
   commonStore.topComponent()
+  snapshotStore.recordSnapshot()
 }
 
 const bottomComponent = () => {
   commonStore.bottomComponent()
+  snapshotStore.recordSnapshot()
 }
 
 const upComponent = () => {
   commonStore.upComponent()
+  snapshotStore.recordSnapshot()
 }
 
 const downComponent = () => {
   commonStore.downComponent()
+  snapshotStore.recordSnapshot()
 }
 
 const unlock = () => {}
