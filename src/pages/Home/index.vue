@@ -5,11 +5,13 @@ import { cloneDeep } from 'lodash-es'
 import componentList from '@/materia-lib/component-list'
 import { useComposeStore } from '@/store/compose'
 import { useCommonStore } from '@/store/common'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import generateID from '@/utils/generateID'
 import { useContextMenu } from '@/store/contextMenu'
 import Toolbar from '@/components/Toolbar.vue'
 import { useSnapshotStore } from '@/store/snapshot'
+
+const activeName = ref('attr')
 
 // store
 const composeStore = useComposeStore()
@@ -86,7 +88,19 @@ const handleMouseDown = (e) => {
       </section>
 
       <!-- 右边属性列表 -->
-      <section class="right"></section>
+      <section class="right">
+        <el-tabs v-if="commonStore.curComponent" v-model="activeName" stretch>
+          <el-tab-pane label="属性" name="attr">
+            <component :is="commonStore.curComponent.component + 'Attr'" />
+          </el-tab-pane>
+          <el-tab-pane label="动画" name="animation" style="padding-top: 20px">
+            <AnimationList />
+          </el-tab-pane>
+          <el-tab-pane label="事件" name="events" style="padding-top: 20px">
+            <EventList />
+          </el-tab-pane>
+        </el-tabs>
+      </section>
     </main>
   </div>
 </template>

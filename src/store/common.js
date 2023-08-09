@@ -45,6 +45,9 @@ export const useCommonStore = defineStore('common', {
       if (height) this.curComponent.style.height = Math.round(height)
       if (width) this.curComponent.style.width = Math.round(width)
     },
+    setShapeSingleStyle({ key, value }) {
+      this.curComponent.style[key] = value
+    },
     deleteComponent(index) {
       if (!index) {
         index = this.curComponentIndex

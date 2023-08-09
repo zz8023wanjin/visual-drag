@@ -61,7 +61,7 @@ const handleContextMenu = (e) => {
       :style="getShapeStyle(item.style)"
       :defalutStyle="item.style"
     >
-      <component :is="item.component" :style="getStyle(item.style)" class="component" :propValue="item.proValue" />
+      <component :is="item.component" :style="getStyle(item.style)" class="component" :element="item" :propValue="item.propValue" />
     </Shape>
 
     <!-- 右键菜单栏 -->

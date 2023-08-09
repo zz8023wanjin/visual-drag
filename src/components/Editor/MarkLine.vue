@@ -147,6 +147,12 @@ const showLine = (isDownward, isRightward) => {
       conditions[key].forEach((condition) => {
         if (!condition.isNearly) return
 
+        // 修改当前组件的位移，吸附效果
+        commonStore.setShapeSingleStyle({
+          key,
+          value: condition.dragShift
+        })
+
         condition.lineNode.style[key] = `${condition.lineShift}px`
         needToShow.push(condition.line)
       })
