@@ -1,7 +1,7 @@
 <script setup>
 import { useCommonStore } from '@/store/common'
-import { useSnapshotStore } from '@/store/snapshot';
-import { to } from 'mathjs'
+import { useSnapshotStore } from '@/store/snapshot'
+import { inject, nextTick } from 'vue'
 
 const props = defineProps({
   active: {
@@ -31,6 +31,8 @@ const pointList = ['lt', 't', 'rt', 'r', 'rb', 'b', 'lb', 'l']
 const commonStore = useCommonStore()
 const snapshotStore = useSnapshotStore()
 
+const EventBus = inject('EventBus')
+
 const onMouseDown = (e) => {
   e.stopPropagation()
 
@@ -44,7 +46,7 @@ const onMouseDown = (e) => {
   const startLeft = Number(pos.left)
 
   let needSave = false
-  const move = (moveEvent) => {
+  const move = async (moveEvent) => {
     needSave = true
     const curX = moveEvent.clientX
     const curY = moveEvent.clientY
@@ -52,10 +54,21 @@ const onMouseDown = (e) => {
     pos.left = curX - startX + startLeft
     pos.top = curY - startY + startTop
     commonStore.setShapeStyle(pos)
+
+    // 等更新完当前组件的样式并绘制到屏幕后在判断是否需要吸附
+    // 如果不使用 nextTick 吸附后将不能移动
+    await nextTick()
+
+    // 触发元素移动事件，用于显示标线、吸附功能
+    // 后面两个参数代表鼠标移动方向
+    // curY - startY > 0 true 表示向下移动 false 表示向上移动
+    // curX - startX > 0 true 表示向右移动 false 表示向左移动
+    EventBus.$emit('move', curY - startY > 0, curX - startX > 0)
   }
 
   const up = () => {
     needSave && snapshotStore.recordSnapshot()
+    EventBus.$emit('unmove')
     document.removeEventListener('mousemove', move)
     document.removeEventListener('mouseup', up)
   }
@@ -125,7 +138,7 @@ const onMouseDownByPoint = (point, e) => {
   const top = Number(style.top)
 
   let needSave = false
-  const move = (event) => {
+  const move = async (event) => {
     needSave = true
     const curX = event.clientX
     const curY = event.clientY
@@ -145,6 +158,7 @@ const onMouseDownByPoint = (point, e) => {
     style.left = newWdith > 0 ? newLeft : left + (hasL ? width : 0)
     style.top = newHeight > 0 ? newTop : top + (hasT ? height : 0)
 
+    // 修改当前组件样式
     commonStore.setShapeStyle(style)
   }
 

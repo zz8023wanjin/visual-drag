@@ -5,6 +5,7 @@ import { changeStyleWithScale } from '@/utils/translate'
 import Grid from './Grid.vue'
 import Shape from './Shape.vue'
 import ContextMenu from './ContextMenu.vue'
+import MarkLine from './MarkLine.vue'
 import { useContextMenu } from '@/store/contextMenu'
 
 // store
@@ -46,6 +47,9 @@ const handleContextMenu = (e) => {
   >
     <!-- 网格线 -->
     <Grid />
+
+    <!-- 吸附和对齐 -->
+    <MarkLine />
 
     <!-- 画板组件列表显示 -->
     <Shape
