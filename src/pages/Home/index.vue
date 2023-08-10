@@ -36,6 +36,19 @@ const handleDrop = (e) => {
   }
 }
 
+const restore = () => {
+  if (localStorage.getItem('canvasData')) {
+    commonStore.setComponentData(JSON.parse(localStorage.getItem('canvasData')))
+  }
+
+  if (localStorage.getItem('canvasStyle')) {
+    commonStore.setCanvasStyle(JSON.parse(localStorage.getItem('canvasStyle')))
+  }
+}
+
+// 初始化，恢复保存的画布数据
+restore()
+
 onMounted(() => {
   composeStore.getEditor()
 })

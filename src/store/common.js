@@ -48,6 +48,9 @@ export const useCommonStore = defineStore('common', {
     setShapeSingleStyle({ key, value }) {
       this.curComponent.style[key] = value
     },
+    setCanvasStyle(style) {
+      this.canvasStyleData = style
+    },
     deleteComponent(index) {
       if (!index) {
         index = this.curComponentIndex
