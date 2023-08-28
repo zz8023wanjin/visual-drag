@@ -1,7 +1,9 @@
 <script setup>
 import { useCommonStore } from '@/store/common'
+import { useComposeStore } from '@/store/compose'
 import { useSnapshotStore } from '@/store/snapshot'
-import { inject, nextTick } from 'vue'
+import { inject, nextTick, ref } from 'vue'
+import calculateComponentPostionAndSize from '@/utils/calculateComponentPostionAndSize'
 
 const props = defineProps({
   active: {
@@ -30,8 +32,10 @@ const pointList = ['lt', 't', 'rt', 'r', 'rb', 'b', 'lb', 'l']
 
 const commonStore = useCommonStore()
 const snapshotStore = useSnapshotStore()
+const composeStore = useComposeStore()
 
 const EventBus = inject('EventBus')
+const shapeRef = ref()
 
 const onMouseDown = (e) => {
   e.stopPropagation()
@@ -99,7 +103,7 @@ const getPointStyle = (point) => {
 
     // 左右两个点
     if (hasL || hasR) {
-      newTop = height / 2
+      newTop = Math.floor(height / 2)
       newLeft = hasL ? 0 : width
     }
   }
@@ -130,46 +134,70 @@ const onMouseDownByPoint = (point, e) => {
   e.stopPropagation()
 
   const style = { ...props.defalutStyle }
-  const startX = e.clientX
-  const startY = e.clientY
-  const width = Number(style.width)
-  const height = Number(style.height)
-  const left = Number(style.left)
-  const top = Number(style.top)
 
+  const proportion = style.width / style.height
+
+  // 组件中心点
+  const center = {
+    x: style.left + style.width / 2,
+    y: style.top + style.height / 2,
+  }
+
+  // 获取画布位置信息
+  const editorRectInfo = composeStore.editor.getBoundingClientRect()
+
+  // 获取当前拖动点的位置信息
+  const pointRect = e.target.getBoundingClientRect()
+
+  // 当前点击圆点当对于画布的中心坐标
+  const curPoint = {
+    x: Math.round(pointRect.left - editorRectInfo.left + e.target.offsetWidth / 2),
+    y: Math.round(pointRect.top - editorRectInfo.top + e.target.offsetHeight / 2),
+  }
+
+  // 获取对称点的坐标
+  const symmetricPoint = {
+    x: center.x + (center.x - curPoint.x),
+    y: center.y + (center.y - curPoint.y),
+  }
+
+  // 是否需要保存快照
   let needSave = false
-  const move = async (event) => {
-    needSave = true
-    const curX = event.clientX
-    const curY = event.clientY
-    const hasT = /t/.test(point)
-    const hasB = /b/.test(point)
-    const hasL = /l/.test(point)
-    const hasR = /r/.test(point)
-    const disX = curX - startX
-    const disY = curY - startY
+  let first = true
 
-    const newLeft = left + (hasL ? disX : 0)
-    const newTop = top + (hasT ? disY : 0)
-    const newHeight = height + (hasT ? -disY : hasB ? disY : 0)
-    const newWdith = width + (hasL ? -disX : hasR ? disX : 0)
-    style.height = newHeight > 0 ? newHeight : 0
-    style.width = newWdith > 0 ? newWdith : 0
-    style.left = newWdith > 0 ? newLeft : left + (hasL ? width : 0)
-    style.top = newHeight > 0 ? newTop : top + (hasT ? height : 0)
+  const move = async (event) => {
+    // 第一次点击时也会触发 move，所以会有“刚点击组件但未移动，组件的大小却改变了”的情况发生
+    // 因此第一次点击时不触发 move 事件
+    if (first) {
+      first = false
+      return
+    }
+
+    needSave = true
+
+    const curPosition = {
+      x: event.clientX - Math.round(editorRectInfo.left),
+      y: event.clientY - Math.round(editorRectInfo.top),
+    }
+
+    calculateComponentPostionAndSize(point, style, curPosition, proportion, false, {
+      center,
+      curPoint,
+      symmetricPoint,
+    })
 
     // 修改当前组件样式
     commonStore.setShapeStyle(style)
   }
 
-  const down = (event) => {
+  const up = () => {
     needSave && snapshotStore.recordSnapshot()
     document.removeEventListener('mousemove', move)
-    document.removeEventListener('mouseup', down)
+    document.removeEventListener('mouseup', up)
   }
 
   document.addEventListener('mousemove', move)
-  document.addEventListener('mouseup', down)
+  document.addEventListener('mouseup', up)
 }
 
 const selectCurComponent = (e) => {
@@ -177,10 +205,56 @@ const selectCurComponent = (e) => {
   e.stopPropagation()
   commonStore.setCurComponent(props.element, props.index)
 }
+
+// 处理旋转
+const handleRotate = (e) => {
+  commonStore.setClickComponentStatus(true)
+  e.preventDefault()
+  e.stopPropagation()
+  // 初始坐标和初始角度
+  const pos = { ...props.defalutStyle }
+  const startY = e.clientY
+  const startX = e.clientX
+  const startRotate = pos.rotate
+
+  // 获取元素中心点位置
+  const rect = shapeRef.value.getBoundingClientRect()
+  const centerX = rect.left + rect.width / 2
+  const centerY = rect.top + rect.height / 2
+
+  // 旋转前的角度
+  const rotateDegreeBefore = Math.atan2(startY - centerY, startX - centerX) / (Math.PI / 180)
+
+  // 如果元素没有移动，则不保存快照
+  let hasMove = false
+  const move = (moveEvent) => {
+    hasMove = true
+    const curX = moveEvent.clientX
+    const curY = moveEvent.clientY
+    // 旋转后的角度
+    const rotateDegreeAfter = Math.atan2(curY - centerY, curX - centerX) / (Math.PI / 180)
+    // 获取旋转的角度值
+    pos.rotate = startRotate + rotateDegreeAfter - rotateDegreeBefore
+
+    // 修改当前组件样式
+    commonStore.setShapeStyle(pos)
+  }
+
+  const up = () => {
+    hasMove && snapshotStore.recordSnapshot()
+    document.removeEventListener('mousemove', move)
+    document.removeEventListener('mouseup', up)
+    // this.cursors = this.getCursor() // 根据旋转角度获取光标位置
+  }
+
+  document.addEventListener('mousemove', move)
+  document.addEventListener('mouseup', up)
+}
 </script>
 
 <template>
-  <div class="shape" @mousedown="onMouseDown" @click="selectCurComponent">
+  <div class="shape" @mousedown="onMouseDown" @click="selectCurComponent" ref="shapeRef">
+    <span v-show="isActive()" class="iconfont icon-xiangyouxuanzhuan" @mousedown="handleRotate"></span>
     <div
       v-for="item in isActive() ? getPointList() : []"
       :style="getPointStyle(item)"
@@ -208,6 +282,21 @@ const selectCurComponent = (e) => {
     height: 8px;
     border-radius: 50%;
     z-index: 1;
+  }
+
+  .icon-xiangyouxuanzhuan {
+    position: absolute;
+    top: -34px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: grab;
+    color: #59c7f9;
+    font-size: 20px;
+    font-weight: 600;
+
+    &:active {
+      cursor: grabbing;
+    }
   }
 }
 </style>

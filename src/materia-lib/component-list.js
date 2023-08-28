@@ -1,3 +1,14 @@
+// 公共样式
+export const commonStyle = {
+  rotate: 0,
+  opacity: 1,
+}
+
+export const commonAttr = {
+  events: {},
+  animations: [],
+}
+
 // 编辑器左侧物料库
 const list = [
   {
@@ -21,5 +32,11 @@ const list = [
     },
   },
 ]
+
+for (let i = 0; i < list.length; i++) {
+  const item = list[i]
+  item.style = { ...commonStyle, ...item.style }
+  list[i] = { ...commonAttr, ...item }
+}
 
 export default list

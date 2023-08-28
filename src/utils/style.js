@@ -28,7 +28,7 @@ export function getStyle(style, filter = []) {
           }
         }
       } else {
-        result.transform = key + '(' + style[key] + 'deg)'
+        result.transform = `rotate(${style[key]}deg)`
       }
     }
   })
@@ -37,13 +37,13 @@ export function getStyle(style, filter = []) {
 }
 
 export function getShapeStyle(style) {
-  const result = {};
-  ['width', 'height', 'top', 'left', 'rotate'].forEach(attr => {
-      if (attr != 'rotate') {
-          result[attr] = style[attr] + 'px'
-      } else {
-          result.transform = 'rotate(' + style[attr] + 'deg)'
-      }
+  const result = {}
+  ;['width', 'height', 'top', 'left', 'rotate'].forEach((attr) => {
+    if (attr != 'rotate') {
+      result[attr] = style[attr] + 'px'
+    } else {
+      result.transform = `rotate(${style[attr]}deg)`
+    }
   })
 
   return result

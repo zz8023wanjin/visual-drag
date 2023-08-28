@@ -1,4 +1,5 @@
 <script setup>
+import { events } from '@/utils/events'
 import { getStyle } from '@/utils/style'
 
 const props = defineProps({
@@ -8,7 +9,12 @@ const props = defineProps({
   },
 })
 
-const onClick = () => {}
+const onClick = () => {
+  const _events = props.config.events
+  Object.keys(_events).forEach((event) => {
+    events[event](_events[event])
+  })
+}
 </script>
 
 <template>

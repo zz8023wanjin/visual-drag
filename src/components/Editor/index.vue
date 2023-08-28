@@ -12,6 +12,8 @@ import { useContextMenu } from '@/store/contextMenu'
 const commonStore = useCommonStore()
 const contextMenuStore = useContextMenu()
 
+const svgFilterAttrs = ['width', 'height', 'top', 'left', 'rotate']
+
 // 处理鼠标右击事件
 const handleContextMenu = (e) => {
   e.preventDefault()
@@ -31,6 +33,10 @@ const handleContextMenu = (e) => {
     target = target.parentNode
   }
   contextMenuStore.showContextMenu({ top, left })
+}
+
+const getComponentStyle = (style) => {
+  return getStyle(style, svgFilterAttrs)
 }
 </script>
 
@@ -61,7 +67,13 @@ const handleContextMenu = (e) => {
       :style="getShapeStyle(item.style)"
       :defalutStyle="item.style"
     >
-      <component :is="item.component" :style="getStyle(item.style)" class="component" :element="item" :propValue="item.propValue" />
+      <component
+        :is="item.component"
+        :style="getComponentStyle(item.style)"
+        class="component"
+        :element="item"
+        :propValue="item.propValue"
+      />
     </Shape>
 
     <!-- 右键菜单栏 -->

@@ -2,6 +2,7 @@
 import { provide } from 'vue'
 import Home from './pages/Home/index.vue'
 import { EventBus } from './utils/eventBus'
+import Test from './pages/Test.vue'
 
 provide('EventBus', EventBus)
 </script>
@@ -9,6 +10,7 @@ provide('EventBus', EventBus)
 <template>
   <div>
     <Home />
+    <!-- <Test /> -->
   </div>
 </template>
 

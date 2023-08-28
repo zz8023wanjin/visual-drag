@@ -10,6 +10,8 @@ import generateID from '@/utils/generateID'
 import { useContextMenu } from '@/store/contextMenu'
 import Toolbar from '@/components/Toolbar.vue'
 import { useSnapshotStore } from '@/store/snapshot'
+import EventList from '@/components/EventList.vue'
+import AnimationList from '@/components/AnimationList.vue'
 
 const activeName = ref('attr')
 

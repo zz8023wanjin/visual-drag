@@ -39,11 +39,12 @@ export const useCommonStore = defineStore('common', {
       this.curComponent = component
       this.curComponentIndex = index
     },
-    setShapeStyle({ top, left, height, width }) {
+    setShapeStyle({ top, left, height, width, rotate }) {
       if (top) this.curComponent.style.top = Math.round(top)
       if (left) this.curComponent.style.left = Math.round(left)
       if (height) this.curComponent.style.height = Math.round(height)
       if (width) this.curComponent.style.width = Math.round(width)
+      if (rotate) this.curComponent.style.rotate = Math.round(rotate)
     },
     setShapeSingleStyle({ key, value }) {
       this.curComponent.style[key] = value
@@ -70,6 +71,13 @@ export const useCommonStore = defineStore('common', {
     },
     setClickComponentStatus(status) {
       this.isClickComponent = status
+    },
+    // animation
+    addAnimation(animation) {
+      this.curComponent.animations.push(animation)
+    },
+    removeAnimation(index) {
+      this.curComponent.animations.splice(index, 1)
     },
     // 上移
     upComponent() {
@@ -108,6 +116,13 @@ export const useCommonStore = defineStore('common', {
       } else {
         toast('已经到底了')
       }
+    },
+    // 事件
+    addEvent({ event, param }) {
+      this.curComponent.events[event] = param
+    },
+    removeEvent(event) {
+      delete this.curComponent.events[event]
     },
   },
 })
