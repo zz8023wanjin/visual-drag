@@ -1,6 +1,6 @@
 import { defineAsyncComponent } from 'vue'
 
-const components = ['VButton']
+const components = ['VButton', 'Picture']
 
 export default function registerGlobalComponents(app) {
   components.forEach(async (key) => {

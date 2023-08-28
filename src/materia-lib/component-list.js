@@ -1,3 +1,5 @@
+import titleImg from '@/assets/title.jpg'
+
 // 公共样式
 export const commonStyle = {
   rotate: 0,
@@ -29,6 +31,23 @@ const list = [
       textAlign: '',
       color: '',
       backgroundColor: '',
+    },
+  },
+  {
+    component: 'Picture',
+    label: '图片',
+    icon: 'tupian',
+    propValue: {
+      url: titleImg,
+      flip: {
+        horizontal: false,
+        vertical: false,
+      },
+    },
+    style: {
+      width: 300,
+      height: 200,
+      borderRadius: '',
     },
   },
 ]
